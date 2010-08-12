@@ -1,0 +1,11 @@
+Name: haskell-macros
+Version: 0.0.1
+Cabal-Version:    >= 1.2
+Build-Type: Simple
+
+Library
+  Build-Depends:  base, haskell-src-exts, haskell-src-exts-qq, template-haskell 
+
+  Exposed-modules:
+    Language.Haskell.TH.Macro
+
