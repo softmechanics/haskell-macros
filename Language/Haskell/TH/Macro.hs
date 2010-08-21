@@ -1,4 +1,9 @@
-module Language.Haskell.TH.Macro (macro, macroWithMode) where
+module Language.Haskell.TH.Macro (
+  expMacro, 
+  decMacro,
+  expMacroWithMode,
+  decMacroWithMode
+  ) where
 
 import Language.Haskell.TH hiding (clause)
 import Language.Haskell.TH.Quote
@@ -23,15 +28,20 @@ import qualified Language.Haskell.Exts.Translate as Hs
 
 defaultParseMode = Hs.defaultParseMode { Hs.extensions = Hs.knownExtensions }
 
-macroWithMode :: Hs.ParseMode -> (String -> String) -> QuasiQuoter
-macroWithMode mode macro 
-  = wrapQuoter (splice . macro) $ hsWithMode mode
-  where splice s = "$( " ++ s ++ " )" -- generate haskell code instead of TH AST.
+expMacroWithMode :: Hs.ParseMode -> (String -> String) -> QuasiQuoter
+expMacroWithMode mode macro = wrapQuoter macro $ hsWithMode mode
 
-macro :: (String -> String) -> QuasiQuoter
-macro = macroWithMode defaultParseMode
+decMacroWithMode :: Hs.ParseMode -> (String -> String) -> QuasiQuoter
+decMacroWithMode mode macro = wrapQuoter macro $ decWithMode mode
+
+expMacro :: (String -> String) -> QuasiQuoter
+expMacro = expMacroWithMode defaultParseMode
+
+decMacro :: (String -> String) -> QuasiQuoter
+decMacro = decMacroWithMode defaultParseMode
 
 wrapQuoter :: (String -> String) -> QuasiQuoter -> QuasiQuoter
-wrapQuoter f (QuasiQuoter f1 f2) = QuasiQuoter (f1 . f) (f2 . f)
+wrapQuoter f (QuasiQuoter f1 f2) = QuasiQuoter (f1 . splice . f) (f2 . splice . f)
+  where splice s = "$( " ++ s ++ " )" -- generate haskell code instead of TH AST.
 
 
